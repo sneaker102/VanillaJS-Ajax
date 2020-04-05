@@ -1,0 +1,14 @@
+{
+  "name": "ajax-homework",
+  "version": "1.0.0",
+  "description": "homework",
+  "main": "index.js",
+  "scripts": {
+    "start": "json-server --watch db.json"
+  },
+  "author": "Ilie Razvan",
+  "license": "MIT",
+  "dependencies": {
+    "json-server": "^0.16.1"
+  }
+}
