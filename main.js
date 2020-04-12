@@ -12,8 +12,21 @@ const userImgContainerHtml = document.getElementById('user-img-container');
 const secondUploadImgHtml = document.getElementById('second-upload-img');
 const chooseColorHtml = document.getElementById('choose-color');
 
+// view data
+const viewNotes = [];
 //api URl
 const apiUrl = 'http://localhost:3000/notes';
+// on init
+(function() {
+    fetch(apiUrl, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(resp => resp.json())
+    .then(data => createViewNotes(data));
+ })();
+
 // search event
 const search$ = Rx.Observable.fromEvent(searchInputHtml, 'keyup')
     .debounceTime(500)
@@ -26,6 +39,7 @@ search$.subscribe(searchValue => {
         .then(console.log);
 });
 
+
 // clear search text event
 clearSearchHtml.addEventListener('click', clearInputValue);
 
@@ -33,8 +47,11 @@ clearSearchHtml.addEventListener('click', clearInputValue);
 createNoteArticleHtml.addEventListener('click', buildFullNoteCard);
 
 //restore initial note card or submit
-pinNoteHtml.addEventListener('click', submitNote)
-
+const submitEvents$ = Rx.Observable
+.merge(...[
+    Rx.Observable.fromEvent(pinNoteHtml, 'click'),
+     Rx.Observable.fromEvent(bodyContentHtml, 'click')])
+     .throttleTime(300).subscribe(e => submitNote(e));
 //upload imgs events
 createNoteWithImgHtml.addEventListener('click', openFileDialog);
 secondUploadImgHtml.addEventListener('click', openFileDialog);
@@ -54,6 +71,17 @@ userImgContainerHtml.addEventListener('mouseleave', () =>
 //clean up onDestroy
 window.addEventListener('beforeunload', clearEvents);
 
+function createViewNotes(data) {
+    if(Array.isArray(data)) {
+        viewNotes.push(...data);
+        // viewNotes.forEach(note => {
+        // const cardLayout =  document.createElemen('article');
+        // cardLayout.className('create-note created-note');
+
+        // note.cardLayoutHtml = cardLayout;
+        // });
+    }
+}
 function submitNote(e) {
     if (e.srcElement.id === 'body-content' || e.srcElement.id === 'pin-note') {
 
@@ -76,15 +104,14 @@ function submitNote(e) {
                 color: noteColor,
                 img: noteImg
             };
-            fetch(apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(myNote)
-            })
-                .then(res => res.json())
-                .then(console.log);
+                fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(myNote)
+                })
+                 .then(_ => buildCreateNoteCard(e));
         } else {
             buildCreateNoteCard(e);
         }
@@ -211,7 +238,6 @@ function buildCreateNoteCard(e) {
         createNoteInputHtml.placeholder = 'Create a note...';
         createNoteWithImgHtml.style.display = 'inline-block';
         pinNoteHtml.style.cssText = 'display:none !important';
-        bodyContentHtml.removeEventListener('click', submitNote);
         createNoteArticleHtml.addEventListener('click', buildFullNoteCard);
     }
 }
@@ -226,7 +252,6 @@ function buildFullNoteCard(e) {
         cardMainContentHtml.style.display = 'block';
         createNoteInputHtml.focus();
         createNoteArticleHtml.removeEventListener('click', buildFullNoteCard);
-        bodyContentHtml.addEventListener('click', submitNote);
     }
 }
 
@@ -264,5 +289,6 @@ function clearAllEventListeners(el) {
 }
 function clearEvents() {
     search$.unsubscribe();
+    submitEvents$.unsubscribe();
     clearAllEventListeners(bodyContentHtml);
 }
