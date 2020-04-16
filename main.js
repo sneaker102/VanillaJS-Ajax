@@ -71,6 +71,7 @@ function createViewNotes(data) {
             const cardLayout = document.createElement('article');
             cardLayout.className = 'create-note created-note';
             cardLayout.style.backgroundColor = note.color;
+
             const uploadedImgContainer = document.createElement('aside');
             uploadedImgContainer.className = 'user-img-container';
             if (note.img.length) {
@@ -78,7 +79,7 @@ function createViewNotes(data) {
                 imgHtml.src = note.img;
                 imgHtml.style.maxHeight = '36.4rem';
                 imgHtml.style.maxWidth = '36.4rem';
-                //img container
+
                 uploadedImgContainer.style.display = 'flex';
                 const dummyHtml = document.createElement('div');
                 dummyHtml.innerHTML = '<i class="far fa-trash-alt remove-img"></i>'
@@ -94,49 +95,93 @@ function createViewNotes(data) {
                 cardLayout.appendChild(uploadedImgContainer);
             }
             const headerSection = document.createElement('section');
+
             const inputTitle = document.createElement('input');
             inputTitle.type = 'text';
             inputTitle.placeholder = 'Title';
             inputTitle.className = 'u-transparent';
             inputTitle.value = note.title;
+            // modal event
+            inputTitle.addEventListener('click', makeModal.bind(this, cardLayout));
+
             headerSection.appendChild(inputTitle);
+
             const pinImg = document.createElement('i');
             pinImg.className = 'fas fa-thumbtack pin-note';
+
             headerSection.appendChild(pinImg);
             cardLayout.appendChild(headerSection);
+
             const mainContentSection = document.createElement('section');
+            mainContentSection.style.display = 'flex';
+            mainContentSection.style.flexDirection = 'column';
+            mainContentSection.style.justifyContent = 'space-between';
+            if (!note.img.length) {
+                mainContentSection.style.height = '95%';
+            } else {
+                mainContentSection.style.height = '20%';
+            }
             const textareaDescription = document.createElement('textarea');
             textareaDescription.className = 'u-transparent';
             textareaDescription.placeholder = 'Create a note...';
             textareaDescription.value = note.description;
+            // modal event
+            textareaDescription.addEventListener('click', makeModal.bind(this, cardLayout));
+
             mainContentSection.appendChild(textareaDescription);
+
             const mainContentFooter = document.createElement('footer');
             const spanContainer = document.createElement('span');
+
             const brushIcon = document.createElement('i');
             brushIcon.className = 'fas fa-paint-brush';
             brushIcon.addEventListener('mouseenter', chooseColor.bind(this, brushIcon, cardLayout, event));
+
             spanContainer.appendChild(brushIcon);
+
             const uploadImgIcon = document.createElement('i');
             uploadImgIcon.className = 'far fa-image';
-            uploadImgIcon.addEventListener('click', openFileDialog.bind(this, uploadedImgContainer, false))
+            uploadImgIcon.addEventListener('click', openFileDialog.bind(this, uploadedImgContainer, false));
+
             spanContainer.appendChild(uploadImgIcon);
             mainContentFooter.appendChild(spanContainer);
+
             const closeBtn = document.createElement('button');
             closeBtn.className = 'u-transparent';
             closeBtn.innerText = 'Close';
             closeBtn.style.display = 'none';
+
             mainContentFooter.appendChild(closeBtn);
             mainContentSection.appendChild(mainContentFooter);
             cardLayout.appendChild(mainContentSection);
             if (note.img.length) {
-                // const modal = document.createElement('div');
-                // modal.className = 'modal';
-                // modal.appendChild(cardLayout);
-                // document.getElementById('created-note-container').appendChild(modal);
+
             } else {
             }
             document.getElementById('created-note-container').appendChild(cardLayout);
         });
+    }
+}
+function makeModal(elementToPop) {
+    if (!!!document.getElementById('my-modal')) {
+        const modal = document.createElement('div');
+        modal.className = 'modal';
+        modal.id = 'my-modal';
+        const closeBtn = elementToPop.children[elementToPop.children.length - 1].children[1].children[1];
+        closeBtn.style.display = 'block';
+        closeBtn.id = 'close-btn'
+        closeBtn.addEventListener('click', removeModal)
+        modal.appendChild(elementToPop);
+        modal.addEventListener('click', removeModal);
+        document.getElementById('created-note-container').appendChild(modal);
+    }
+}
+function removeModal(e) {
+    if (e.target.id === 'my-modal' || e.target.id === 'close-btn') {
+        const createdNotesContainer = document.getElementById('created-note-container');
+        const modalDiv = document.getElementById('my-modal');
+        createdNotesContainer.insertBefore(modalDiv.firstChild, createdNotesContainer.firstChild);
+        createdNotesContainer.removeChild(modalDiv);
     }
 }
 function submitNote(e) {
@@ -253,7 +298,6 @@ function fileDialogChanged(imgContainer, isNewNote, e) {
         const fileName = e.target.files[0].name;
         const reader = new FileReader();
         reader.onload = function (fileLoadEvent) {
-            // second child is the actual img
             if (!imgContainer.childNodes.length) {
                 const imgHtml = document.createElement('img');
                 imgHtml.id = 'user-img-upload';
@@ -291,7 +335,11 @@ function buildCreateNoteCard(e) {
     if (e.srcElement.id === 'body-content' || e.srcElement.id === 'pin-note'
         || e.srcElement.id === 'close-note') {
         e.stopPropagation();
-        // removeImg();
+        // remove img
+        const cardFirstElement = createNoteArticleHtml.firstElementChild;
+        if (cardFirstElement.tagName === 'ASIDE') {
+            createNoteArticleHtml.removeChild(cardFirstElement);
+        }
         noteTextHtml.value = '';
         cardMainContentHtml.style.display = 'none';
         createNoteInputHtml.value = '';
@@ -344,8 +392,8 @@ function getStyle(el, styleProp) {
     return document.defaultView.getComputedStyle(el, null)[styleProp];
 }
 function clearAllEventListeners(el) {
-    const bodyContentClone = el.cloneNode(true);
-    el.parentNode.replaceChild(bodyContentClone, el);
+    const elClone = el.cloneNode(true);
+    el.parentNode.replaceChild(elClone, el);
 }
 function clearEvents() {
     search$.unsubscribe();

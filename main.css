@@ -174,6 +174,7 @@ body {
 .modal .created-note {
   max-width: unset;
   max-height: unset;
+  width: 75rem;
 }
 .moda .created-note .user-img-container {
   height: 25rem;
