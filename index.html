@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    <div class="body-content">
+    <div id="body-content" class="body-content">
         <header class="toolbar">
             <aside>
                 <i class="far fa-lightbulb"></i>
@@ -26,9 +26,9 @@
             </section>
         </header>
         <article id="create-note-article" class="create-note">
-            <aside class="user-img-container" id="user-img-container">
-            </aside>
-            <section>
+            <!-- <aside class="user-img-container" id="user-img-container">
+            </aside> -->
+            <section id='card-header-section'>
                 <input id="create-note-input" class="u-transparent" type="text" placeholder="Create a note...">
                 <i id="create-note-with-image" class="far fa-image create-with-image"></i>
                 <i id="pin-note" class="fas fa-thumbtack pin-note"></i>
@@ -45,7 +45,7 @@
             </section>
         </article>
         <div id="created-note-container" class="created-note-container">
-            <article class="create-note created-note">
+            <!-- <article class="create-note created-note">
                 <section>
                     <input class="u-transparent" type="text" placeholder="Title">
                     <i class="fas fa-thumbtack"></i>
@@ -113,10 +113,10 @@
                             onclick="buildCreateNoteCard(event)">Close</button>
                     </footer>
                 </section>
-            </article>
+            </article>-->
             
 
-        </div>
+        </div> 
     </div>
 </body>
 
