@@ -4,7 +4,7 @@
   "description": "homework",
   "main": "index.js",
   "scripts": {
-    "start": "json-server --watch db.json"
+    "db": "json-server --watch db.json"
   },
   "author": "Ilie Razvan",
   "license": "MIT",

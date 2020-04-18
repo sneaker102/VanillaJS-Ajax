@@ -12,44 +12,44 @@
 </head>
 
 <body>
-    <div id="body-content" class="body-content">
-        <header class="toolbar">
-            <aside>
-                <i class="far fa-lightbulb"></i>
-                <span>Google</span>
-                <span>Keep</span>
-            </aside>
-            <section>
-                <i class="fas fa-search"></i>
-                <input class="u-transparent" id="search" type="text" placeholder="Search">
-                <i id="clear-search" class="fas fa-times"></i>
-            </section>
-        </header>
-        <article id="create-note-article" class="create-note">
-            <section id='card-header-section'>
-                <input id="create-note-input" class="u-transparent" type="text" placeholder="Create a note...">
+    <header class="toolbar">
+        <aside>
+            <i class="far fa-lightbulb"></i>
+            <span>Google</span>
+            <span>Keep</span>
+        </aside>
+        <section>
+            <i class="fas fa-search"></i>
+            <input class="u-transparent" id="search-input" type="text" placeholder="Search">
+            <i class="fas fa-times"></i>
+        </section>
+    </header>
+    <article id="create-note-card" class="create-note">
+        <section>
+            <div>
+                <input class="u-transparent" type="text" placeholder="Create a note...">
                 <i id="create-note-with-image" class="far fa-image create-with-image"></i>
                 <i id="pin-note" class="fas fa-thumbtack pin-note"></i>
-            </section>
-            <section class="card-main-content" id="card-main-content">
-                <textarea id="note-text" class="u-transparent" placeholder="Create a note..."></textarea>
-                <footer>
-                    <span>
-                        <i id="choose-color" class="fas fa-paint-brush"></i>
-                        <i id="second-upload-img" class="far fa-image"></i>
-                    </span>
-                    <button id="close-note" class="u-transparent" onclick="buildCreateNoteCard(event)">Close</button>
-                </footer>
-            </section>
-        </article>
-        <div id="created-note-container" class="created-note-container">
-            <!-- <article class="create-note created-note">
+            </div>
+            <textarea class="u-display-none u-transparent description-note" placeholder="Create a note..."></textarea>
+        </section>
+        <footer class="u-display-none">
+            <span>
+                <i class="fas fa-paint-brush"></i>
+                <i class="far fa-image"></i>
+            </span>
+            <button id="close-note" class="u-transparent" onclick="createNote.buildSmallCard(event)">Close</button>
+        </footer>
+    </article>
+    <div id="created-note-container" class="created-note-container">
+        <!--     <article class="create-note created-note">
                 <section>
-                    <input class="u-transparent" type="text" placeholder="Title">
-                    <i class="fas fa-thumbtack"></i>
-                </section>
-                <section>
+                    <div>
+                        <input class="u-transparent" type="text" placeholder="Title">
+                        <i class="fas fa-thumbtack"></i>
+                    </div>
                     <textarea class="u-transparent" placeholder="Create a note..."></textarea>
+                </section>
                     <footer>
                         <span>
                             <i class="fas fa-paint-brush"></i>
@@ -58,9 +58,8 @@
                         <button id="close-note" class="u-transparent"
                             onclick="buildCreateNoteCard(event)">Close</button>
                     </footer>
-                </section>
             </article>
-            <article class="create-note created-note">
+             <article class="create-note created-note">
                 <section>
                     <input class="u-transparent" type="text" placeholder="Title">
                     <i class="fas fa-thumbtack"></i>
@@ -112,9 +111,7 @@
                     </footer>
                 </section>
             </article>-->
-            
 
-        </div> 
     </div>
 </body>
 

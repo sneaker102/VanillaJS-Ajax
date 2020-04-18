@@ -16,9 +16,6 @@ body {
   font-size: 1.6rem;
   min-height: 96.6rem;
 }
-.body-content {
-  min-height: 96.6rem;
-}
 /* styling */
 .toolbar {
   display: flex;
@@ -62,6 +59,9 @@ body {
   cursor: pointer;
 }
 .create-note {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   width: 50%;
   background-color: #ecf0f1;
   max-width: 60rem;
@@ -75,10 +75,10 @@ body {
   font-weight: bold;
   font-size: 18px;
 }
-.create-note section:first-of-type {
+.create-note section:first-of-type > div {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  width: 100%;
 }
 .create-with-image {
   font-size: 24px;
@@ -89,7 +89,7 @@ body {
   font-size: 20px;
   cursor: pointer;
 }
-.create-note textarea {
+.description-note {
   min-height: 6rem;
   width: 100%;
   margin-top: 1.6rem;
@@ -97,31 +97,30 @@ body {
   font-family: "Google Sans", Roboto, Arial, sans-serif;
   font-weight: bold;
   resize: none;
+  overflow: hidden;
 }
-.create-note section:last-of-type footer {
+
+.create-note footer {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 18px;
 }
-.create-note section:last-of-type footer i {
+.create-note footer i {
   cursor: pointer;
 }
-.create-note section:last-of-type footer i:last-of-type {
+.create-note  footer i:last-of-type {
   margin-left: 1.6rem;
 }
-.create-note section:last-of-type footer > button {
+.create-note footer > button {
   width: 8rem;
   height: 2.8rem;
   border-radius: 4px;
   font-size: 18px;
   cursor: pointer;
 }
-.create-note section:last-of-type footer > button:hover {
+.create-note footer > button:hover {
   background-color: #dcdcdc;
-}
-.card-main-content {
-  display: none;
 }
 .user-img-container {
   display: none;
@@ -129,8 +128,8 @@ body {
   margin-bottom: 1.6rem;
 }
 .remove-img {
-  display: none !important;
-  position: relative;
+  align-self: flex-end;
+  opacity: 0;
   font-size: 2rem;
   cursor: pointer;
 }
@@ -155,12 +154,6 @@ body {
   flex-wrap: wrap;
   align-items: center;
 }
-.created-note {
-  display: inline-block;
-  background-color: #ecf0f1;
-  max-width: 40rem;
-  max-height: 40rem;
-}
 .modal {
   display: flex;
   position: fixed; 
@@ -170,11 +163,19 @@ body {
   left: 0;
   top: 0;
   background-color: rgba(0,0,0,0.6);
+  overflow: auto;
+}
+.created-note {
+  width: unset;
+  min-width: 30%;
 }
 .modal .created-note {
   max-width: unset;
   max-height: unset;
-  width: 75rem;
+  overflow: auto;
+  min-width: 70rem;
+  width: fit-content;
+  height: fit-content;
 }
 .moda .created-note .user-img-container {
   height: 25rem;
@@ -191,3 +192,6 @@ body {
   background: unset;
   border: unset;
 }
+.u-display-none {
+  display: none !important;
+ }
