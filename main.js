@@ -381,7 +381,7 @@ class NoteView extends AbstractNote {
 
         const closeBtn = document.createElement('button');
         closeBtn.className = 'u-transparent u-display-none';
-        closeBtn.innerText = 'Close';
+        closeBtn.innerText = 'Delete';
 
         cardFooter.appendChild(closeBtn);
         cardLayout.appendChild(cardFooter);
@@ -402,7 +402,7 @@ class NoteView extends AbstractNote {
             this.pinNoteIcon.style.cssText = 'display:inline-block !important';
 
             this.closeBtn.style.cssText = 'display:block !important';
-            this.closeBtn.id = 'close-btn'
+            this.closeBtn.id = 'delete-btn'
             this.closeBtn.addEventListener('click', this.removeModal.bind(this))
 
             modal.appendChild(this.cardContainer);
@@ -413,12 +413,12 @@ class NoteView extends AbstractNote {
     removeModal(e) {
         const modalDiv = document.getElementById('my-modal');
         if (!!modalDiv &&
-            (e.target.id === 'my-modal' || e.target.id === 'close-btn' || e.target.id === 'pin-note')) {
+            (e.target.id === 'my-modal' || e.target.id === 'delete-btn' || e.target.id === 'pin-note')) {
             const createdNotesContainer = document.getElementById('created-note-container');
             this.closeBtn.style.cssText = 'display:none !important';
             this.pinNoteIcon.style.cssText = 'display:none !important';
-            // if it is not the save clicked then we restore data in note
-            if (e.target.id !== 'pin-note') {
+            // if it is not the save or delete clicked then we restore data in note
+            if (e.target.id === 'my-modal') {
                 this.titleInput.value = this.note.title;
                 this.descriptionTextarea.value = this.note.description;
                 this.cardContainer.style.backgroundColor = this.note.color;
@@ -427,9 +427,12 @@ class NoteView extends AbstractNote {
                 } else {
                     this.removeImg();
                 }
-                // do not insert back the note if save was clicked
+                // do not insert back the note if save or delete was clicked
                 // because a data refresh will be triggered
                 createdNotesContainer.insertBefore(modalDiv.firstChild, createdNotesContainer.firstChild);
+            }
+            if (e.target.id === 'delete-btn') {
+                this.deleteNote();
             }
             createdNotesContainer.removeChild(modalDiv);
         }
@@ -486,6 +489,12 @@ class NoteView extends AbstractNote {
             this.updateNote();
             this.removeModal(e);
         }
+    }
+    deleteNote() {
+        fetch(this.updateUrl, {
+            method: 'DELETE'
+        })
+            .then(_ => this.reloadDataFn(''));
     }
 }
 //api URl
