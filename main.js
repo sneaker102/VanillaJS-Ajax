@@ -56,6 +56,9 @@ class AbstractNote {
         }
         return this.cardContainer.children[1].children[1];
     }
+    afterImageCreated(img) {
+        // to be overrided by the class in need
+    }
     openFileDialog(e) {
         if (!!e) {
             e.stopPropagation();
@@ -69,10 +72,12 @@ class AbstractNote {
     }
     fileDialogChanged(e) {
         if (e.target.files && e.target.files[0]) {
+            const afterImageCreated = this.afterImageCreated.bind(this);
             const putImgOnCard = this.putImgOnCard.bind(this);
             const reader = new FileReader();
             reader.onload = function (fileLoadEvent) {
                 putImgOnCard(fileLoadEvent.target.result);
+                afterImageCreated(fileLoadEvent.target.result);
             };
             reader.readAsDataURL(e.target.files[0]);
         }
@@ -192,10 +197,11 @@ class AbstractNote {
 }
 
 class CreateNote extends AbstractNote {
-    constructor(cardContainer, submitUrl) {
+    constructor(cardContainer, submitUrl, reloadDataFn) {
         super(cardContainer);
         this.submitUrl = submitUrl;
         this.createNoteByImgIcon = document.getElementById('create-note-with-image');
+        this.reloadDataFn = reloadDataFn;
         //create full note
         this.cardContainer.addEventListener('click', this.buildFullCard.bind(this));
 
@@ -255,7 +261,10 @@ class CreateNote extends AbstractNote {
                     },
                     body: JSON.stringify(myNote)
                 })
-                    .then(_ => this.buildSmallCard(e));
+                    .then(_ => {
+                        this.reloadDataFn('');
+                        this.buildSmallCard(e);
+                    });
 
             } else {
                 this.buildSmallCard(e);
@@ -306,11 +315,13 @@ class CreateNote extends AbstractNote {
 }
 
 class NoteView extends AbstractNote {
-    constructor(note, updateUrl) {
+    constructor(note, updateUrl, reloadDataFn) {
 
         const cardLayout = document.createElement('article');
 
         super(cardLayout);
+        this.reloadDataFn = reloadDataFn;
+        this.note = note;
         this.updateUrl = updateUrl;
 
         cardLayout.className = 'create-note created-note';
@@ -332,6 +343,8 @@ class NoteView extends AbstractNote {
 
         const pinImg = document.createElement('i');
         pinImg.className = 'fas fa-thumbtack pin-note';
+        pinImg.id = 'pin-note';
+        pinImg.addEventListener('click', this.saveNote.bind(this));
 
         dummyDiv.appendChild(pinImg);
 
@@ -387,7 +400,7 @@ class NoteView extends AbstractNote {
             modal.id = 'my-modal';
 
             this.pinNoteIcon.style.cssText = 'display:inline-block !important';
-            
+
             this.closeBtn.style.cssText = 'display:block !important';
             this.closeBtn.id = 'close-btn'
             this.closeBtn.addEventListener('click', this.removeModal.bind(this))
@@ -399,17 +412,85 @@ class NoteView extends AbstractNote {
     }
     removeModal(e) {
         const modalDiv = document.getElementById('my-modal');
-        if (!!modalDiv && (e.target.id === 'my-modal' || e.target.id === 'close-btn')) {
+        if (!!modalDiv &&
+            (e.target.id === 'my-modal' || e.target.id === 'close-btn' || e.target.id === 'pin-note')) {
             const createdNotesContainer = document.getElementById('created-note-container');
             this.closeBtn.style.cssText = 'display:none !important';
             this.pinNoteIcon.style.cssText = 'display:none !important';
-            createdNotesContainer.insertBefore(modalDiv.firstChild, createdNotesContainer.firstChild);
+            // if it is not the save clicked then we restore data in note
+            if (e.target.id !== 'pin-note') {
+                this.titleInput.value = this.note.title;
+                this.descriptionTextarea.value = this.note.description;
+                this.cardContainer.style.backgroundColor = this.note.color;
+                if (!!this.uploadedImg && this.note.img.length) {
+                    this.uploadedImg.src = this.note.img;
+                } else {
+                    this.removeImg();
+                }
+                // do not insert back the note if save was clicked
+                // because a data refresh will be triggered
+                createdNotesContainer.insertBefore(modalDiv.firstChild, createdNotesContainer.firstChild);
+            }
             createdNotesContainer.removeChild(modalDiv);
+        }
+    }
+    updateNote() {
+        fetch(this.updateUrl, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(this.note)
+        })
+            .then(_ => this.reloadDataFn(''));
+    }
+    selectColor(elToMark, allElColors, e) {
+        super.selectColor(elToMark, allElColors, e);
+        // we want to update only when not in modal
+        // caz in modal mode we have pin-note icon for save
+        if (!!!document.getElementById('my-modal') && elToMark.style.backgroundColor !== this.note.color) {
+            this.note.color = elToMark.style.backgroundColor;
+            this.updateNote();
+        }
+    }
+    afterImageCreated(img) {
+        // we want to update only when not in modal
+        // caz in modal mode we have pin-note icon for save
+        if (!!!document.getElementById('my-modal') && img !== this.note.img) {
+            this.note.img = img;
+            this.updateNote();
+        }
+    }
+    removeImg() {
+        super.removeImg();
+        // we want to update only when not in modal
+        // caz in modal mode we have pin-note icon for save
+        if (!!!document.getElementById('my-modal')) {
+            this.note.img = '';
+            this.updateNote();
+        }
+    }
+    saveNote(e) {
+        if (this.titleInput.value !== this.note.title ||
+            this.descriptionTextarea.value !== this.note.description ||
+            !!this.uploadedImg && this.uploadedImg.src !== this.note.img ||
+            this.getStyle(this.cardContainer, 'backgroundColor') !== this.note.color) {
+            this.note.title = this.titleInput.value;
+            this.note.description = this.descriptionTextarea.value;
+            this.note.color = this.getStyle(this.cardContainer, 'backgroundColor');
+            if (!!this.uploadedImg) {
+                this.note.img = this.uploadedImg.src;
+            } else {
+                this.note.img = '';
+            }
+            this.updateNote();
+            this.removeModal(e);
         }
     }
 }
 //api URl
 const apiUrl = 'http://localhost:3000/notes';
+let noteDataArr;
 
 // search notes
 const searchNote = {
@@ -420,8 +501,13 @@ const searchNote = {
             .then(res => res.json())
             .then(data => {
                 if (Array.isArray(data)) {
+                    // remember data in order to check for updates
+                    noteDataArr = data;
+                    // clear previous data
+                    document.getElementById('created-note-container').innerHTML = '';
+
                     data.forEach(note => {
-                        const myNoteView = new NoteView(note, apiUrl);
+                        const myNoteView = new NoteView(note, apiUrl + '/' + note.id, searchNote.apiSearch);
                     });
                 }
             });
@@ -455,7 +541,7 @@ const searchNote = {
     }
 };
 
-const createNote = new CreateNote(document.getElementById('create-note-card'), apiUrl);
+const createNote = new CreateNote(document.getElementById('create-note-card'), apiUrl, searchNote.apiSearch);
 
 searchNote.initEvents();
 
