@@ -251,7 +251,7 @@ class CreateNote extends AbstractNote {
                     title: this.titleInput.value,
                     description: this.descriptionTextarea.value,
                     color: this.getStyle(this.cardContainer, 'backgroundColor'),
-                    img: !!this.uploadedImg ? this.uploadedImg : ''
+                    img: !!this.uploadedImg ? this.uploadedImg.src : ''
                 };
 
                 fetch(this.submitUrl, {
